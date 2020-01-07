@@ -95,7 +95,7 @@ class ReflexAgent(Agent):
             if oldGhostDist == None or ghostDist < oldGhostDist:
                 oldGhost = ghost
                 oldGhostDist = ghostDist
-        # if closest ghost is 'scared', distance is inverted so pacman is attracted
+        # if closest ghost is 'scared', distance is inverted so Pacman is attracted
         if oldGhost != None and oldGhost.scaredTimer != 0:
             oldGhostDist = oldGhostDist * -1
 
@@ -107,7 +107,7 @@ class ReflexAgent(Agent):
             if newGhostDist == None or ghostDist < newGhostDist:
                 newGhost = ghost
                 newGhostDist = ghostDist
-        # if closest ghost is 'scared', distance is inverted so pacman is attracted to ghost
+        # if closest ghost is 'scared', distance is inverted so Pacman is attracted to ghost
         if newGhost != None and newGhost.scaredTimer != 0:
             newGhostDist = newGhostDist * -1
 
@@ -127,7 +127,7 @@ class ReflexAgent(Agent):
             gScorePriority = 1
 
         # fScore is score based on distance from food, higher is better
-        # if pacman has not reached food
+        # if Pacman has not reached food
         if not len(oldFood) > len(newFood):
             # closest food distance in old state
             oldFoodDist = None
@@ -209,6 +209,37 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
+        # returns the action selected by the minimax algorithm
+        return self.minimax(gameState, 0)[1]
+
+    def minimax(self, gameState, depth):
+        """ Minimax recursive helper method for getAction """
+
+        numAgents = gameState.getNumAgents()
+
+        # 0 specifies Pacman, non-0 represents a ghost
+        agent = depth % numAgents
+
+        # termination condition if game ends or depth limit is reached
+        if gameState.isWin() or gameState.isLose() or depth == self.depth * numAgents:
+            return self.evaluationFunction(gameState), None
+
+        # Recursive call gets score for each legal action
+        successors = []
+        actions = gameState.getLegalActions(agent)
+        for action in actions:
+            score = self.minimax(gameState.generateSuccessor(agent, action), depth + 1)[0]
+            successors.append((score, action))
+
+        # for Pacman (maximizing player)
+        if agent == 0:
+            successor = max(successors)
+
+        # for ghosts (minimizing player)
+        else:
+            successor = min(successors)
+
+        return successor
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):

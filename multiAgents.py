@@ -214,7 +214,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return self.minimax(gameState, 0)[1]
 
     def minimax(self, gameState, depth):
-        """ Minimax recursive helper method for getAction """
+        """ Minimax recursive algorithm for getAction """
 
         numAgents = gameState.getNumAgents()
 
@@ -258,6 +258,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return self.alphaBeta(gameState, 0, math.inf * -1, math.inf)[1]
 
     def alphaBeta(self, gameState, depth, alpha, beta):
+        """ Minimax recursive algorithm with alpha-beta pruning for getAction """
 
         numAgents = gameState.getNumAgents()
 
@@ -315,7 +316,44 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # returns the action selected by the expectimax algorithm
+        return self.expectimax(gameState, 0)[1]
+
+    def expectimax(self, gameState, depth):
+        """ Expectimax recursive algorithm for getAction """
+
+        numAgents = gameState.getNumAgents()
+
+        # 0 specifies Pacman, non-0 represents a ghost
+        agent = depth % numAgents
+
+        # termination condition if game ends or depth limit is reached
+        if gameState.isWin() or gameState.isLose() or depth == self.depth * numAgents:
+            return self.evaluationFunction(gameState), None
+
+        actions = gameState.getLegalActions(agent)
+
+        # for Pacman (maximizing player)
+        if agent == 0:
+            successor = None
+            for action in actions:
+                score = self.expectimax(gameState.generateSuccessor(agent, action), depth + 1)[0]
+                current = score, action
+                if successor:
+                    successor = max(successor, current)
+                else:
+                    successor = current
+            return successor
+
+        # for ghosts (chance player)
+        else:
+            netScore = 0
+            for action in actions:
+                netScore += self.expectimax(gameState.generateSuccessor(agent, action), depth + 1)[0]
+            # gets average score, assuming ghosts select action randomly
+            score = netScore / len(actions)
+            return score, None
 
 def betterEvaluationFunction(currentGameState):
     """

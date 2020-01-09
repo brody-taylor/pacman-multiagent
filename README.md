@@ -43,11 +43,27 @@ autograder.py -q q2 --no-graphics
 To visualize the alpha-beta pruning minimax search:
 
 ```bash
-pacman.py -p AlphaBetaAgent -a depth=3 -l smallClassic
+pacman.py -p AlphaBetaAgent -l smallClassic -a depth=3 
 ```
 
 To grade the alpha-beta pruning minimax search:
 
 ```bash
 autograder.py -q q3 --no-graphics
+```
+
+## Expectimax Algorithm
+
+Algorithm assumes ghost chooses a legal action uniformly at random.
+
+To visualize the expectimax search:
+
+```bash
+pacman.py -p ExpectimaxAgent -l minimaxClassic -a depth=3
+```
+
+To grade the expectimax search:
+
+```bash
+autograder.py -q q4 --no-graphics
 ```

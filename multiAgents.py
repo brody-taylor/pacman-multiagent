@@ -15,6 +15,7 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
+import math
 
 from game import Agent
 
@@ -252,7 +253,54 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # returns the action selected by the minimax algorithm
+        return self.alphaBeta(gameState, 0, math.inf * -1, math.inf)[1]
+
+    def alphaBeta(self, gameState, depth, alpha, beta):
+
+        numAgents = gameState.getNumAgents()
+
+        # 0 specifies Pacman, non-0 represents a ghost
+        agent = depth % numAgents
+
+        # termination condition if game ends or depth limit is reached
+        if gameState.isWin() or gameState.isLose() or depth == self.depth * numAgents:
+            return self.evaluationFunction(gameState), None
+
+        actions = gameState.getLegalActions(agent)
+        successor = None
+
+        # for Pacman (maximizing player)
+        if agent == 0:
+            for action in actions:
+                score = self.alphaBeta(gameState.generateSuccessor(agent, action), depth + 1, alpha, beta)[0]
+                current = score, action
+                if successor:
+                    successor = max(successor, current)
+                else:
+                    successor = current
+                # beta cut-off
+                alpha = max(alpha, successor[0])
+                if beta < alpha:
+                    break
+
+        # for ghosts (minimizing player)
+        else:
+            for action in actions:
+                score = self.alphaBeta(gameState.generateSuccessor(agent, action), depth + 1, alpha, beta)[0]
+                current = score, action
+                if successor:
+                    successor = min(successor, current)
+                else:
+                    successor = current
+                # alpha cut-off
+                beta = min(successor[0], beta)
+                if beta < alpha:
+                    break
+
+        return successor
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """

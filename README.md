@@ -67,3 +67,21 @@ To grade the expectimax search:
 ```bash
 autograder.py -q q4 --no-graphics
 ```
+
+## Expectimax Algorithm with Improved Evaluation Function
+
+Algorithm assumes ghost chooses a legal action uniformly at random.
+
+Uses an improved evaluation of game states.
+
+To visualize the improved evaluation function:
+
+```bash
+pacman.py autograder.py -q q5
+```
+
+To grade the improved evaluation function:
+
+```bash
+autograder.py -q q5 --no-graphics
+```

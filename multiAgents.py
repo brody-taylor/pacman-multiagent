@@ -93,11 +93,11 @@ class ReflexAgent(Agent):
         oldGhostDist = None
         for ghost in oldGhostStates:
             ghostDist = manhattanDistance(ghost.getPosition(), oldPos)
-            if oldGhostDist == None or ghostDist < oldGhostDist:
+            if oldGhostDist is None or ghostDist < oldGhostDist:
                 oldGhost = ghost
                 oldGhostDist = ghostDist
         # if closest ghost is 'scared', distance is inverted so Pacman is attracted
-        if oldGhost != None and oldGhost.scaredTimer != 0:
+        if oldGhost is not None and oldGhost.scaredTimer != 0:
             oldGhostDist = oldGhostDist * -1
 
         # gets distance of closest ghost in new state
@@ -105,11 +105,11 @@ class ReflexAgent(Agent):
         newGhostDist = None
         for ghost in newGhostStates:
             ghostDist = manhattanDistance(ghost.getPosition(), newPos)
-            if newGhostDist == None or ghostDist < newGhostDist:
+            if newGhostDist is None or ghostDist < newGhostDist:
                 newGhost = ghost
                 newGhostDist = ghostDist
         # if closest ghost is 'scared', distance is inverted so Pacman is attracted to ghost
-        if newGhost != None and newGhost.scaredTimer != 0:
+        if newGhost is not None and newGhost.scaredTimer != 0:
             newGhostDist = newGhostDist * -1
 
         # gScore is score based on distance from ghost, higher is better
@@ -134,13 +134,13 @@ class ReflexAgent(Agent):
             oldFoodDist = None
             for food in oldFood:
                 foodDist = manhattanDistance(food, oldPos)
-                if oldFoodDist == None or foodDist < oldFoodDist:
+                if oldFoodDist is None or foodDist < oldFoodDist:
                     oldFoodDist = foodDist
             # closest food distance in new state
             newFoodDist = None
             for food in newFood:
                 foodDist = manhattanDistance(food, newPos)
-                if newFoodDist == None or foodDist < newFoodDist:
+                if newFoodDist is None or foodDist < newFoodDist:
                     newFoodDist = foodDist
             fScore = oldFoodDist - newFoodDist
         # if pacman has reached food
@@ -225,7 +225,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if gameState.isWin() or gameState.isLose() or depth == self.depth * numAgents:
             return self.evaluationFunction(gameState), None
 
-        # Recursive call gets score for each legal action
+        # recursive call gets score for each legal action
         successors = []
         actions = gameState.getLegalActions(agent)
         for action in actions:
@@ -360,10 +360,42 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: State evaluated on distance to closest food,
+                 number of remaining foods (priority 2x food dist),
+                 and average distance from ghost (priority grows exponentially:
+                 far ghost < food dist, close ghost > remaining foods)
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    position = currentGameState.getPacmanPosition()
+    foods = currentGameState.getFood().asList() + currentGameState.getCapsules()
+    ghostStates = currentGameState.getGhostStates()
+
+    # addition of game score prevents Pacman stagnation
+    if currentGameState.isLose():
+        return -100000 + currentGameState.getScore()
+    elif currentGameState.isWin():
+        return 100000 + currentGameState.getScore()
+
+    # gScore is score based on distance from ghosts, higher is better
+    gScore = 0
+    for ghost in ghostStates:
+        ghostDist = manhattanDistance(ghost.getPosition(), position)
+        # non-linear for extreme avoidance if ghost is closer, and less if ghost is far away
+        # numerator is distance when ghost avoidance is more important than food, must be > 2
+        if ghost.scaredTimer == 0:
+            gScore -= 4 / ghostDist
+        # attraction to 'scared' ghost equal to food attraction
+        else:
+            foods += [ghost.getPosition()]
+    gScore = gScore / len(ghostStates)
+
+    # fScore is score based on distance from closest food and remaining food
+    fScore = -len(foods)
+    fScore += 1/min([manhattanDistance(position, food) for food in foods])
+
+    return gScore + fScore + currentGameState.getScore()
+
 
 # Abbreviation
 better = betterEvaluationFunction
